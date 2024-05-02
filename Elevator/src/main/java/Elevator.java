@@ -1,5 +1,9 @@
-package org.example;
 import java.util.Scanner;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.text.*;
 
 public class Elevator {
     int Max_flor = 6;
@@ -7,6 +11,7 @@ public class Elevator {
     int current_flor = 1;
     boolean Moving = false;
     int target_flor = 0;
+    int start_flor = 0;
 
     public static void main(String[] args) {
         Elevator elevator = new Elevator();
@@ -22,7 +27,7 @@ public class Elevator {
         System.out.println("Текущий этаж: " + current_flor);
     }
 
-    public void handInput(Scanner scanner) {
+    public void handInput(Scanner scanner) {     // Полученаем ввод от пользователя и сваеряем, правельный ли запрос.
         System.out.print("Введите номер этажа (1-6): ");
         try {
             int input = scanner.nextInt();
@@ -41,12 +46,13 @@ public class Elevator {
         }
     }
 
-    private void startElevator(int floor) {
+    private void startElevator(int floor) { // Начало движения лифта
         target_flor = floor;
+        start_flor = current_flor;
         Moving = true;
     }
 
-    public void moveElevator() {
+    public void moveElevator() {    // Перемещение лифта
         if (Moving) {
             if (current_flor < target_flor) {
                 while (current_flor < target_flor) {
@@ -57,13 +63,12 @@ public class Elevator {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (current_flor == target_flor) {
-                        System.out.println("Лифт прибыл на " + current_flor + " этаж.");
-
-                    }
                 }
+                System.out.println("Лифт прибыл на " + current_flor + " этаж.");
+                Moving = false;
+                logElevatorMovement();
             } else if (current_flor > target_flor) {
-                while (current_flor > target_flor ) {
+                while (current_flor > target_flor) {
                     System.out.println("Лифт находится на " + current_flor + " этаже и опускается дальше. Ждите.");
                     current_flor--;
                     try {
@@ -71,12 +76,24 @@ public class Elevator {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (current_flor == target_flor) {
-                        System.out.println("Лифт прибыл на " + current_flor + " этаж.");
-                    }
-
                 }
+                System.out.println("Лифт прибыл на " + current_flor + " этаж.");
+                Moving = false;
+                logElevatorMovement();
             }
         }
     }
+
+private void logElevatorMovement() { // Запись информации о перемещении лифта в файл elevator_log.txt
+    try {
+        Date dateNow = new Date();
+        SimpleDateFormat formatForDateNow = new SimpleDateFormat("'время' hh:mm:ss");
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter("elevator_log.txt", true));
+        writer.write("Лифт переместился с " + start_flor + " на " + target_flor + " этаж"+ formatForDateNow.format(dateNow)+"\n");
+        writer.close();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+  }
 }
